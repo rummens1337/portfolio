@@ -33,6 +33,18 @@ RUN docker-php-ext-install gd
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install npm
+ENV NODE_VERSION=16.11.1
+RUN apt install -y curl
+RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+RUN node --version
+RUN npm --version
+
 # Add user for laravel application
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
@@ -45,6 +57,11 @@ COPY --chown=www:www . /var/www
 
 # Change current user to www
 USER www
+
+# Install composer dependencies after project structure is copied to container.
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN composer update
+RUN composer install
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
