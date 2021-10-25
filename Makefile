@@ -1,3 +1,7 @@
+# Environment variables (could also be imported from an external env file).
+NODE_VERSION=lts-buster-slim
+COMPOSER_VERSION=2.1.9
+
 # Docker commands
 docker-run: ./docker-compose.yml
 	docker-compose up
@@ -14,25 +18,25 @@ docker-full-build: \
 
 # Composer commands
 composer-install: ./vendor
-	docker run --rm -v $(shell pwd):/app composer | composer install
+	sudo -S docker run --rm -v $(shell pwd):/app composer:$(COMPOSER_VERSION) install
 
 composer-update: ./vendor
-	docker run --rm -v $(shell pwd):/app composer | composer update
+	sudo -S docker run --rm -v $(shell pwd):/app composer:$(COMPOSER_VERSION) update
 
-composer: ./vendor
-	docker run --rm -v $(shell pwd):/app composer | composer $(arg)
+composer: ./vendor # Run with arg=<command>
+	sudo -S docker run --rm -v $(shell pwd):/app composer:$(COMPOSER_VERSION) $(arg)
 
 
 
 # NPM commands
-npm-install: ./node_modules
-	docker run --rm -v $(shell pwd):/app node | npm ci
+npm-install:
+	sudo -S docker run --rm -v $(shell pwd):/app -w /app node:$(NODE_VERSION) npm install --loglevel=verbose
 
-npm-update: ./node_modules
-	docker run --rm -v $(shell pwd):/app node | npm update
+npm-update:
+	sudo -S docker run --rm -v $(shell pwd):/app -w /app node:$(NODE_VERSION) npm update --loglevel=verbose
 
-npm: ./vendor
-	docker run --rm -v $(shell pwd):/app node | npm $(arg)
+npm: # Run with arg=<command>
+	sudo -S docker run --rm -v $(shell pwd):/app -w /app node:$(NODE_VERSION) npm $(arg) --loglevel=verbose
 
 
 

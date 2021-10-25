@@ -13,3 +13,9 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Generated file(s) (extensions)
+*.sass-cache
+*.css
+*.css.*
+/public/js/app.js
